@@ -198,6 +198,51 @@ class CnerProcessor(DataProcessor):
             examples.append(InputExample(guid=guid, text_a=text_a, labels=labels))
         return examples
 
+class QuerynerProcessor(DataProcessor):
+    """Processor for the chinese ner data set."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(self._read_text(os.path.join(data_dir, "train.txt")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(self._read_text(os.path.join(data_dir, "dev.txt")), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(self._read_text(os.path.join(data_dir, "test.txt")), "test")
+
+    def get_labels(self):
+        """See base class."""
+        return ['O', 'B-goods', 'I-goods', 'B-time', 'I-time', 'B-nonsense', 'I-nonsense', 'B-price',
+                'I-price', 'B-brand', 'I-brand', 'B-ip', 'I-ip', 'B-location', 'I-location', 'B-company', 'I-company',
+                'B-holiday', 'I-holiday', 'B-new', 'I-new', 'B-promotion', 'I-promotion', 'B-movie', 'I-movie',
+                'B-game', 'I-game', 'B-series', 'I-series', 'B-height', 'I-height', 'B-figure', 'I-figure',
+                'B-suit', 'I-suit', 'B-color-name', 'I-color-name', 'B-scene', 'I-scene', 'B-gender', 'I-gender',
+                'B-crowd', 'I-crowd', 'B-color', 'I-color', 'B-style', 'I-style', 'B-season', 'I-season', 'B-material',
+                'I-material', 'B-function', 'I-function', 'B-attribute', 'I-attribute',"[START]", "[END]"]
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i == 0:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            text_a= line['words']
+            # BIOS
+            labels = []
+            for x in line['labels']:
+                if 'M-' in x:
+                    labels.append(x.replace('M-','I-'))
+                elif 'E-' in x:
+                    labels.append(x.replace('E-', 'I-'))
+                else:
+                    labels.append(x)
+            examples.append(InputExample(guid=guid, text_a=text_a, labels=labels))
+        return examples
+
 class CluenerProcessor(DataProcessor):
     """Processor for the chinese ner data set."""
 
@@ -236,5 +281,6 @@ class CluenerProcessor(DataProcessor):
 
 ner_processors = {
     "cner": CnerProcessor,
-    'cluener':CluenerProcessor
+    'cluener':CluenerProcessor,
+    'queryner':QuerynerProcessor,
 }
